@@ -1,0 +1,8 @@
+[googlecalendar]
+CALENDAR_ID=<google calendar id>
+
+[openweathermap]
+LAT=<latitude>
+LON=<longitude>
+API_KEY=<openweathermap-api-key>
+
