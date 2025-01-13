@@ -1,5 +1,7 @@
 Small application to show calender events, today's weather and a quote on the [Piromoni Inky Impression 7.3" 7 color e-ink display](https://shop.pimoroni.com/products/inky-impression-7-3?variant=40512683376723)
 
+![Screenshot](./images/screenshot.jpg)
+
 # Requirements
 
 * A Inky Impression display
