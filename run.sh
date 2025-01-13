@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home/gertjan/.virtualenvs/pimoroni/bin/activate
 cd /home/gertjan/frame
+source /home/gertjan/.virtualenvs/pimoroni/bin/activate
 ./inky_app.py
 

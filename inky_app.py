@@ -16,6 +16,7 @@ from font_source_sans_pro import SourceSansProSemibold
 import configparser
 import requests
 from io import BytesIO
+import numpy as np
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
@@ -24,12 +25,27 @@ normal_font = ImageFont.truetype(SourceSansProSemibold, 24)
 small_font = ImageFont.truetype(SourceSansProSemibold, 18)
 large_font = ImageFont.truetype(SourceSansProSemibold, 48)
 
+def getLabelFromText(txt):
+  splitted = txt.split(':')
+  if (len(splitted)>1):
+    return splitted[0], splitted[1]
+  else:
+    return None, txt
+
+ # ImageDraw.textbbox(xy, text, font=None, anchor=None, spacing=4, align='left', direction=None, features=None, language=None, stroke_width=0, embedded_color=False, font_size=None)
+
+
+
 def drawEvent(canvas, disp, event, offset):
   start = event["start"].get("dateTime", event["start"].get("date"))
   dt = datetime.datetime.fromisoformat(start).strftime('%a %-d %b %Y, %H:%M')
-  canvas.text((10,offset), dt + " " + event["summary"], disp.BLACK, normal_font)
+  lbl, summary = getLabelFromText(event["summary"])
+  if lbl:
+    canvas.rounded_rectangle([(10, offset+3),(20+canvas.textlength(lbl, normal_font), offset+28)], radius=3, fill=disp.BLUE)
+    canvas.text((15, offset), lbl, disp.WHITE, normal_font)
+  canvas.text((100, offset), dt + " " + summary, disp.BLACK, normal_font)
   if "location" in event.keys():
-    canvas.text((10, offset+24), event["location"], disp.BLACK,small_font)
+    canvas.text((100, offset+24), event["location"], disp.BLACK,small_font)
 
 def getLatestEventsFromGoogleCalendar(maxEvents, cal_id):
   creds = Credentials.from_authorized_user_file("token.json", SCOPES)
@@ -78,12 +94,9 @@ def getQuote():
   return f'"{quote["q"]}" - {quote["a"]}'
 
 def split_line(line, split_at):
-    words = line.split()
-    lines = [' '.join(words[i:i + split_at]) for i in range(0, len(words), split_at)]
-    return '\n'.join(lines)
-
-
-
+  words = line.split()
+  lines = [' '.join(words[i:i + split_at]) for i in range(0, len(words), split_at)]
+  return '\n'.join(lines)
 
 def updateDisplay(config, weather, quote, events):
   disp = auto(ask_user=True, verbose=True)
@@ -131,9 +144,21 @@ def updateDisplay(config, weather, quote, events):
     y += EVENT_HEIGHT
 
   canvas.multiline_text((MARGIN,BOTTOMBAR_UPPER_Y), quote, disp.WHITE, small_font)
+ 
+# outputimg = Image.fromarray(img*255)
+# outputimg.save("/home/gertjan/frame/screenshot.png", "png")
+  saveImage(img)
 
   disp.set_image(img)
   disp.show()
+
+def saveImage(img):
+  in_array = np.full((1, 1), 300)
+  multiplier  = lambda t: t * 255
+  vfunc = np.vectorize(multiplier)
+  out_array = vfunc(in_array)
+  outputImage = Image.fromarray(out_array, mode="RGB")
+  outputImage.save("/home/gertjan/frame/screenshot.png", "png")
 
 def main():
   config=configparser.ConfigParser()
