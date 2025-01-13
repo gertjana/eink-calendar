@@ -1,6 +1,6 @@
 Small application to show calender events, today's weather and a quote on the [Piromoni Inky Impression 7.3" 7 color e-ink display](https://shop.pimoroni.com/products/inky-impression-7-3?variant=40512683376723)
 
-![Screenshot](./images/screenshot.jpg)
+
 
 # Requirements
 
@@ -29,3 +29,16 @@ Get the Calender ID of the google calendar you want to show and fill that in (ri
 now you can run the inky_app.py
 
 I've crontabbed run.sh to make it update each morning
+
+
+## 3D Case
+
+There's a 3d case model [here](./3d files/Wall_mount_inky_V4.stl)
+I modified [this design](https://www.thingiverse.com/thing:6291834) to make it mountable on a wall
+
+
+## How does it look:
+
+As you can see, I need to calibrate my 3d printer's first layer :) 
+
+![Screenshot](./images/screenshot.jpg)
