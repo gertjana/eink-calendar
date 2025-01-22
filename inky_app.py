@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import datetime
 import os
+import sys
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from googleapiclient import sample_tools
 
 from inky.auto import auto
 from inky.inky_uc8159 import CLEAN
@@ -47,9 +49,51 @@ def drawEvent(canvas, disp, event, offset):
   if "location" in event.keys():
     canvas.text((110, offset+24), event["location"], disp.BLACK,small_font)
 
+def getLatestEventsClientSecret(maxEvents, cal_id):
+  service, flags = sample_tools.init(
+    sys.argv,
+    "calendar",
+    "v3",
+    __doc__,
+    __file__,
+    scope="https://www.googleapis.com/auth/calendar.readonly",
+  )
+
+  try:
+    page_token = None
+    while True:
+      calendar_list = service.calendarList().list(pageToken=page_token).execute()
+      for calendar_list_entry in calendar_list["items"]:
+        print(calendar_list_entry["summary"])
+      page_token = calendar_list.get("nextPageToken")
+      if not page_token:
+        break
+
+  except client.AccessTokenRefreshError:
+    print(
+      "The credentials have been revoked or expired, please re-run"
+      "the application to re-authorize."
+    )
+
+
+        
+
+
 def getLatestEventsFromGoogleCalendar(maxEvents, cal_id):
   creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-
+  if not creds or not creds.valid:
+    if creds and creds.expired and creds.refresh_token:
+      print("Refreshing token")
+      creds.refresh(Request())
+    else:
+      flow = InstalledAppFlow.from_client_secrets_file(
+          "credentials.json", SCOPES
+      )
+      creds = flow.run_local_server(port=0)
+    # Save the credentials for the next run
+    with open("token.json", "w") as token:
+      token.write(creds.to_json())
+  
   try:
     service = build("calendar", "v3", credentials=creds)
 
@@ -123,7 +167,7 @@ def updateDisplay(config, weather, quote, events):
   canvas = ImageDraw.Draw(img)
   
   canvas.text((MARGIN, 0), datetime.date.today().strftime("%a %d %b"), disp.WHITE, large_font)
-  canvas.text((MARGIN, 68), f"Last updated: {datetime.datetime.today().strftime('%d %b H:%M')}", disp.WHITE, small_font)
+  canvas.text((MARGIN, 68), f"Last updated: {datetime.datetime.today().strftime('%d %b %H:%M')}", disp.WHITE, small_font)
   
   canvas.text((ICON_LEFT, 2), f'{weather["main"]}', disp.WHITE, small_font)
 
@@ -159,6 +203,10 @@ def saveImage(img, disp):
  img.save("/home/gertjan/frame/screenshot.png", "png")
 
 def main():
+
+#  getLatestEventsClientSecret(6,"")
+#  exit();
+  
   config=configparser.ConfigParser()
   try:
     config.read_file(open(os.getcwd() + '/config.txt'))
